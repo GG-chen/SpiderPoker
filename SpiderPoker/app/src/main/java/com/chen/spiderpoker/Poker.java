@@ -31,7 +31,6 @@ public class Poker {
     private Resources res;
     private int bitmapID;
     private Bitmap faceBitmap;
-    private boolean isClickable = false;
     private Bitmap currentBitmap;
     private Bitmap backBitmap;
     private Bitmap shadeBitmap;
@@ -102,9 +101,6 @@ public class Poker {
         return startY;
     }
 
-    public void setClickable(boolean clickable) {
-        isClickable = clickable;
-    }
 
     public void setDistanceXY(int distanceX, int distanceY) {
         this.distanceX = distanceX;
@@ -139,5 +135,14 @@ public class Poker {
 
     public boolean isFace() {
         return isFace;
+    }
+
+    public void clear() {
+        isFace = false;
+        isShade = false;
+        startX = -1;
+        startY = -1;
+        distanceX = 0;
+        distanceY = 0;
     }
 }

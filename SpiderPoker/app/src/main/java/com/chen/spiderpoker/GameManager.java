@@ -1,21 +1,19 @@
 package com.chen.spiderpoker;
 
 import android.content.Context;
-import android.content.pm.ProviderInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.support.v4.util.ArraySet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Shinelon on 2017/4/11.
@@ -28,7 +26,7 @@ public class GameManager {
     private int currentLevel = LEVEL_EASY;
 
     private final GameView gameView;
-    private Set<Poker> pokerSet = new ArraySet<>();
+    private List<Poker> pokerList = new ArrayList<>();
     private List<PokerGroup> lists = new ArrayList<>();
     private List<PokerGroup> storeList = new ArrayList<>();
     private PokerGroup movingGroup;
@@ -41,6 +39,7 @@ public class GameManager {
     private int storePokerStartX;
     private int storePokerStartY;
     private Bitmap backBitmap;
+    private Bitmap reflashBitmap;
 
     public GameManager(Context context, int width, int height, GameView gameView) {
         this.gameView = gameView;
@@ -56,8 +55,6 @@ public class GameManager {
         itemWidth = width/10;
         for (int i = 1; i < 11; i++) {
             PokerGroup group = new PokerGroup(context, i, currentLevel);
-            /*Log.d("GameManager", "initData: itemWidth " + itemWidth + "  width" + width);
-            Log.d("GameManager", "initData: " + i + "  ---  " + (i-1)*itemWidth);*/
             group.setStartX((i-1)*itemWidth);
             group.setWidth(itemWidth);
             lists.add(group);
@@ -67,9 +64,9 @@ public class GameManager {
             storeList.add(group);
         }
         movingGroup  = new PokerGroup(context, 16, currentLevel);
-        createPoker();
         backBitmap =Utils.zoomImg(BitmapFactory.decodeResource(context.getResources(), R.drawable.back), 110, 157) ;
-
+        reflashBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reflash);
+        createPoker();
     }
 
     public void onDraw(Canvas canvas, Paint paint) {
@@ -85,6 +82,10 @@ public class GameManager {
                 canvas.drawBitmap(backBitmap, null, des, paint);
             }
         }
+        //画刷新图标
+        Rect des = new Rect();
+        des.set(width - 200, height - 200, width - 200 + 128,height - 200 + 128);
+        canvas.drawBitmap(reflashBitmap,null,des,paint);
     }
 
 
@@ -93,9 +94,7 @@ public class GameManager {
             lists.get(i).onDraw(canvas,paint);
         }
         movingGroup.onDraw(canvas, paint);
-        /*for (int i = 0; i < storeList.size(); i++) {
-            storeList.get(i).onDraw(canvas);
-        }*/
+
 
     }
     private int whichOne = -1;
@@ -113,13 +112,16 @@ public class GameManager {
                     sendPoker();
                     return;
                 }
-                 whichOne = x / itemWidth;
+                if (isReflash(x, y)) {
+                    Toast.makeText(context, "刷新！！", Toast.LENGTH_SHORT).show();
+                    reflash();
+                    return;
+                }
+                whichOne = x / itemWidth;
                 whichItem = lists.get(whichOne).witchPoker(y);
                 boolean moveable = lists.get(whichOne).moveable(whichItem);
                 if (whichItem != -1 && moveable) {
                     List<Poker> moving = getMovingList(whichOne, whichItem);
-                    //Poker p = lists.get(whichOne).getList().get(whichItem);
-                    //lists.get(whichOne).getList().remove(lists.get(whichOne).witchPoker(y));
                     movingGroup.getList().addAll(moving);
                     movingGroup.setStartX(moving.get(0).getStartX());
                 }
@@ -129,7 +131,6 @@ public class GameManager {
                     int distanceX = (int) (event.getX() - x);
                     int distanceY = (int) (event.getY() - y);
                     movingGroup.setDistanceXY(distanceX, distanceY);
-                    //Log.d("GameManager", "onTouch: ACTION_MOVE！！！！ distanceX" + distanceX+ "  distanceY  " + distanceY);
                 }
 
                 break;
@@ -162,23 +163,31 @@ public class GameManager {
                     whichOne = -1;
                     x = -1;
                     y = -1;
-                    //Log.d("GameManager", "onTouch: up！！！！" + movingGroup.getCount()+ "lists size" + lists.get(whichOne).getCount());
                 }
                 break;
         }
 
     }
 
+    private boolean isReflash(int x, int y) {
+        if (x > width - 200 && x < width - 200 + 128 && y > height - 200 && y < height - 200 + 128) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void reflash() {
+        clearList();
+        switchPoker();
+    }
+
     private void checkIsFinish(int whichOne2) {
         reflashPoker(whichOne2);
         List<Poker> listA = lists.get(whichOne2).getList();
         int count = listA.size();
-        Log.d("GameManager", "开始检查是否完成1");
         if (count == 0 || count < 13 || Integer.parseInt(listA.get(count - 1).getmNum()) != 1) {
-            Log.d("GameManager", "开始检查是否完成2");
-            return;
         }
-        Log.d("GameManager", "开始检查是否完成3");
         Boolean isFinish = isFinish(listA, count -1);
         if (isFinish) {
             Log.d("GameManager", "完成了一组！！" + whichOne2 + " size " + count);
@@ -227,7 +236,7 @@ public class GameManager {
     }
 
     private Boolean isClickStore(int x, int y) {
-        if (x > storePokerStartX && x < ((storePokerCount - 1) * distance) + 120 && y > storePokerStartY && y < storePokerStartY + 157) {
+        if (x > storePokerStartX && x < (((storePokerCount - 1) * distance) + 110) && y > storePokerStartY && y < storePokerStartY + 157) {
             return true;
         } else {
             return false;
@@ -300,8 +309,8 @@ public class GameManager {
                         Poker poker2 = new Poker(context);
                         poker1.init(num,j,1,false,buffer1);
                         poker2.init(num,j,4,false,buffer2);
-                        pokerSet.add(poker1);
-                        pokerSet.add(poker2);
+                        pokerList.add(poker1);
+                        pokerList.add(poker2);
                     } else {
                         String buffer1 = num + j + 2;
                         String buffer2 = num + j + 3;
@@ -309,19 +318,25 @@ public class GameManager {
                         Poker poker2 = new Poker(context);
                         poker1.init(num,j,2,false,buffer1);
                         poker2.init(num,j,3,false,buffer2);
-                        pokerSet.add(poker1);
-                        pokerSet.add(poker2);
+                        pokerList.add(poker1);
+                        pokerList.add(poker2);
                     }
 
                 }
 
             }
         }
+        switchPoker();
+
+    }
+
+    private void switchPoker() {
+        Collections.shuffle(pokerList);
         int i = 0;
         int j = 0;
         int k = 0;
         int l = 0;
-        for(Iterator it = pokerSet.iterator(); it.hasNext(); )
+        for(Iterator it = pokerList.iterator(); it.hasNext(); )
         {
             if (k <4) {
                 lists.get(j).addInitItem((Poker) it.next());
@@ -341,7 +356,6 @@ public class GameManager {
                     j++;
                 }
             } else if (k >= 10) {
-                Log.d("GameManager", "createPoker: " + "i=" + i + "  k=" + k + "  l=" + l);
                 storeList.get(l).addInitItem((Poker) it.next());
                 if (i == 9) {
                     storeList.get(l).getList().get(i).setFace(true);
@@ -352,20 +366,23 @@ public class GameManager {
             }
             i++;
         }
-        for (int m = 0; m < lists.size(); m++) {
-            Log.d("GameManager", "createPoker: lists" + m + "-------" + lists.get(m).getCount());
-        }
-        for (int m = 0; m < storeList.size(); m++) {
-            Log.d("GameManager", "createPoker: storeList" + m + "-------" + storeList.get(m).getCount());
-        }
-
     }
 
 
     public void clearList() {
-        lists.clear();
+        for (int i = 0; i < lists.size(); i++) {
+            lists.get(i).clearAllDate();
+        }
         storeList.clear();
-        pokerSet.clear();
+        for (int i = 11; i < 16; i++) {
+            PokerGroup group = new PokerGroup(context, i,currentLevel);
+            storeList.add(group);
+        }
+        storePokerCount = storeList.size();
+        movingGroup.clearAllDate();
+        for (Poker poker : pokerList) {
+            poker.clear();
+        }
     }
 
     public void setStorePokerStartX(int storePokerStartX) {
