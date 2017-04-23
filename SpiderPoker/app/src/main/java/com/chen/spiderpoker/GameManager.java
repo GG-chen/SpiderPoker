@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -40,6 +42,7 @@ public class GameManager {
     private int storePokerStartY;
     private Bitmap backBitmap;
     private Bitmap reflashBitmap;
+    private SoundPool soundPool;
 
     public GameManager(Context context, int width, int height, GameView gameView) {
         this.gameView = gameView;
@@ -66,6 +69,9 @@ public class GameManager {
         movingGroup  = new PokerGroup(context, 16, currentLevel);
         backBitmap =Utils.zoomImg(BitmapFactory.decodeResource(context.getResources(), R.drawable.back), 110, 157) ;
         reflashBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reflash);
+        //加载声音
+        soundPool= new SoundPool(10, AudioManager.STREAM_SYSTEM,5);
+        soundPool.load(context,R.raw.sound,1);
         createPoker();
     }
 
@@ -164,6 +170,7 @@ public class GameManager {
                     x = -1;
                     y = -1;
                 }
+                soundPool.play(1,1, 1, 0, 0, 1);
                 break;
         }
 
