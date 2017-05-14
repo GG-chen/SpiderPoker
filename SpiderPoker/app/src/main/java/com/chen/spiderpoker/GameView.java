@@ -1,23 +1,30 @@
 package com.chen.spiderpoker;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.LinearLayout;
 
 /**
  * Created by Shinelon on 2017/4/12.
  */
 
-public class GameView extends SurfaceView implements SurfaceHolder.Callback {
+public class GameView extends SurfaceView implements SurfaceHolder.Callback, View.OnClickListener {
     private GameManager gameManager;
     private Context context;
     private SurfaceHolder holder;
@@ -25,6 +32,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private int width;
     private int height;
     private Paint paint;
+    private AlertDialog dialog;
 
     public GameView(Context context) {
         this(context, null);
@@ -62,6 +70,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        showDialog();
+    }
+
+    private void threadStart() {
         myThread.isRun = true;
         myThread.start();
     }
@@ -74,6 +86,30 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         myThread.isRun = false;
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.easy:
+                gameManager.setCurrentLevel(GameManager.LEVEL_EASY);
+                dialog.cancel();
+                threadStart();
+                break;
+            case R.id.ordinary:
+                gameManager.setCurrentLevel(GameManager.LEVEL_ORDINARY);
+                dialog.cancel();
+                threadStart();
+                break;
+            case R.id.hard:
+                gameManager.setCurrentLevel(GameManager.LEVEL_HARD);
+                dialog.cancel();
+                threadStart();
+                break;
+            case R.id.exit:
+                ((MainActivity)context).exitActivity();
+        }
 
     }
 
@@ -114,5 +150,30 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+    private void showDialog() {
+         LinearLayout layout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_dialog, null);
+        dialog = new AlertDialog.Builder(context).create();
+        dialog.show();
+        dialog.getWindow().setContentView(layout);
+        layout.findViewById(R.id.easy).setOnClickListener(this);
+        layout.findViewById(R.id.ordinary).setOnClickListener(this);
+        layout.findViewById(R.id.hard).setOnClickListener(this);
+        layout.findViewById(R.id.exit).setOnClickListener(this);
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event)
+            {
+                if (keyCode == KeyEvent.KEYCODE_SEARCH)
+                {
+                    return true;
+                }
+                else
+                {
+                    return true; //默认返回 false，这里false不能屏蔽返回键，改成true就可以了
+                }
+            }
+        });
+
     }
 }

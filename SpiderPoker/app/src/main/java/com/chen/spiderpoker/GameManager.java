@@ -399,4 +399,12 @@ public class GameManager {
     public void setStorePokerStarty(int storePokerStarty) {
         this.storePokerStartY = storePokerStarty;
     }
+
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public void setCurrentLevel(int currentLevel) {
+        this.currentLevel = currentLevel;
+    }
 }
