@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
@@ -20,42 +19,42 @@ public class Poker {
     private int mColor;
     //类型  梅花 方块 桃心 黑桃
     private int mType;
-    private Context context;
+    private Context mContext;
     //开始和结束坐标
-    private int startX = -1;
-    private int startY = -1;
-    private int width = 110;
-    private int height = 157;
+    private int mStartX = -1;
+    private int mStartY = -1;
+    private int mWidth = 110;
+    private int mHeight = 157;
     private boolean isFace = true;
     private boolean isShade = false;
-    private Resources res;
-    private int bitmapID;
-    private Bitmap faceBitmap;
-    private Bitmap currentBitmap;
-    private Bitmap backBitmap;
-    private Bitmap shadeBitmap;
-    private int distanceX = 0;
-    private int distanceY = 0;
+    private Resources mRes;
+    private int mBitmapID;
+    private Bitmap mFaceBitmap;
+    private Bitmap mCurrentBitmap;
+    private Bitmap mBackBitmap;
+    private Bitmap mShadeBitmap;
+    private int mDistanceX = 0;
+    private int mDistanceY = 0;
 
     public Poker(Context context) {
-        this.context = context;
-        res =context.getResources();
+        this.mContext = context;
+        mRes =context.getResources();
     }
 
     public void draw(Canvas canvas, Paint paint) {
-        if (currentBitmap != null) {
+        if (mCurrentBitmap != null) {
             Bitmap bitmap = null;
             if (isFace) {
                 if (isShade) {
-                    bitmap = shadeBitmap;
+                    bitmap = mShadeBitmap;
                 } else {
-                    bitmap = currentBitmap;
+                    bitmap = mCurrentBitmap;
                 }
             } else {
-                bitmap = backBitmap;
+                bitmap = mBackBitmap;
             }
             Rect des = new Rect();
-            des.set(startX + distanceX,startY + distanceY,startX + width + distanceX,startY + height + distanceY);
+            des.set(mStartX + mDistanceX, mStartY + mDistanceY, mStartX + mWidth + mDistanceX, mStartY + mHeight + mDistanceY);
             canvas.drawBitmap(bitmap, null, des, paint);
         }
 
@@ -70,14 +69,14 @@ public class Poker {
         this.mColor = mColor;
         this.mType = mType;
         this.isFace = isFace;
-        bitmapID =  res.getIdentifier("z"+ name,"drawable",context.getPackageName());
-        faceBitmap = BitmapFactory.decodeResource(context.getResources(), bitmapID);
-        faceBitmap = Utils.zoomImg(faceBitmap, width ,height);
-        shadeBitmap = Utils.zoomImg(BitmapFactory.decodeResource(context.getResources(), res.getIdentifier("b" + name, "drawable", context.getPackageName())), width, height);
-        backBitmap = Utils.zoomImg(BitmapFactory.decodeResource(context.getResources(), R.drawable.back), width, height);
-        currentBitmap = faceBitmap;
-        width = currentBitmap.getWidth();
-        height = currentBitmap.getHeight();
+        mBitmapID =  mRes.getIdentifier("z"+ name,"drawable", mContext.getPackageName());
+        mFaceBitmap = BitmapFactory.decodeResource(mContext.getResources(), mBitmapID);
+        mFaceBitmap = Utils.zoomImg(mFaceBitmap, mWidth, mHeight);
+        mShadeBitmap = Utils.zoomImg(BitmapFactory.decodeResource(mContext.getResources(), mRes.getIdentifier("b" + name, "drawable", mContext.getPackageName())), mWidth, mHeight);
+        mBackBitmap = Utils.zoomImg(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.back), mWidth, mHeight);
+        mCurrentBitmap = mFaceBitmap;
+        mWidth = mCurrentBitmap.getWidth();
+        mHeight = mCurrentBitmap.getHeight();
     }
 
     public void setFace(boolean face) {
@@ -85,32 +84,32 @@ public class Poker {
     }
 
 
-    public void setStartX(int startX) {
-        this.startX = startX;
+    public void setmStartX(int mStartX) {
+        this.mStartX = mStartX;
     }
 
-    public void setStartY(int startY) {
-        this.startY = startY;
+    public void setmStartY(int mStartY) {
+        this.mStartY = mStartY;
     }
 
-    public int getStartX() {
-        return startX;
+    public int getmStartX() {
+        return mStartX;
     }
 
-    public int getStartY() {
-        return startY;
+    public int getmStartY() {
+        return mStartY;
     }
 
 
     public void setDistanceXY(int distanceX, int distanceY) {
-        this.distanceX = distanceX;
-        this.distanceY = distanceY;
-        //Log.d("Poker", "setDistanceXY: startX" + startX + "  startY  " + startY);
+        this.mDistanceX = distanceX;
+        this.mDistanceY = distanceY;
+        //Log.d("Poker", "setDistanceXY: mStartX" + mStartX + "  mStartY  " + mStartY);
     }
 
     public void setDistanceLastXY(int distanceX, int distanceY) {
-        this.startX += distanceX;
-        this.startY += distanceY;
+        this.mStartX += distanceX;
+        this.mStartY += distanceY;
     }
 
     public String getmNum() {
@@ -140,9 +139,10 @@ public class Poker {
     public void clear() {
         isFace = false;
         isShade = false;
-        startX = -1;
-        startY = -1;
-        distanceX = 0;
-        distanceY = 0;
+        mStartX = -1;
+        mStartY = -1;
+        mDistanceX = 0;
+        mDistanceY = 0;
     }
+
 }

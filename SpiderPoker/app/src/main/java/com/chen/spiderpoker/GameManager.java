@@ -25,53 +25,54 @@ public class GameManager {
     public static final int LEVEL_EASY = 0;
     public static final int LEVEL_ORDINARY = 1;
     public static final int LEVEL_HARD = 2;
-    private int currentLevel = LEVEL_EASY;
+    private int mCurrentLevel = LEVEL_EASY;
 
-    private final GameView gameView;
-    private List<Poker> pokerList = new ArrayList<>();
-    private List<PokerGroup> lists = new ArrayList<>();
-    private List<PokerGroup> storeList = new ArrayList<>();
-    private PokerGroup movingGroup;
-    private int width;
-    private int height;
-    private Context context;
-    private int itemWidth;
-    private int storePokerCount = 5;
-    private int distance = 40;
-    private int storePokerStartX;
-    private int storePokerStartY;
-    private Bitmap backBitmap;
-    private Bitmap reflashBitmap;
-    private SoundPool soundPool;
+    private final GameView mGameView;
+    private List<Poker> mPokerList = new ArrayList<>();
+    private List<PokerGroup> mLists = new ArrayList<>();
+    private List<PokerGroup> mStoreList = new ArrayList<>();
+    private PokerGroup mMovingGroup;
+    private int mWidth;
+    private int mHeight;
+    private Context mContext;
+    private int mItemWidth;
+    private int mStorePokerCount = 5;
+    private int mDistance = 40;
+    private int mStorePokerStartX;
+    private int mStorePokerStartY;
+    private Bitmap mBackBitmap;
+    private Bitmap mReflashBitmap;
+    private SoundPool mSoundPool;
+    public static  int mHasFinishPokerCount = 0;
 
     public GameManager(Context context, int width, int height, GameView gameView) {
-        this.gameView = gameView;
-        this.context = context;
-        this.width = width;
-        this.height = height;
-        storePokerStartX = 40;
-        storePokerStartY = height - 180;
+        this.mGameView = gameView;
+        this.mContext = context;
+        this.mWidth = width;
+        this.mHeight = height;
+        mStorePokerStartX = 40;
+        mStorePokerStartY = height - 180;
         initData();
     }
 
     private void initData() {
-        itemWidth = width/10;
+        mItemWidth = mWidth /10;
         for (int i = 1; i < 11; i++) {
-            PokerGroup group = new PokerGroup(context, i, currentLevel);
-            group.setStartX((i-1)*itemWidth);
-            group.setWidth(itemWidth);
-            lists.add(group);
+            PokerGroup group = new PokerGroup(mContext, i, mCurrentLevel);
+            group.setmStartX((i-1)* mItemWidth);
+            group.setmWidth(mItemWidth);
+            mLists.add(group);
         }
         for (int i = 11; i < 16; i++) {
-            PokerGroup group = new PokerGroup(context, i,currentLevel);
-            storeList.add(group);
+            PokerGroup group = new PokerGroup(mContext, i, mCurrentLevel);
+            mStoreList.add(group);
         }
-        movingGroup  = new PokerGroup(context, 16, currentLevel);
-        backBitmap =Utils.zoomImg(BitmapFactory.decodeResource(context.getResources(), R.drawable.back), 110, 157) ;
-        reflashBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reflash);
+        mMovingGroup = new PokerGroup(mContext, 16, mCurrentLevel);
+        mBackBitmap =Utils.zoomImg(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.back), 110, 157) ;
+        mReflashBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.reflash);
         //加载声音
-        soundPool= new SoundPool(10, AudioManager.STREAM_SYSTEM,5);
-        soundPool.load(context,R.raw.sound,1);
+        mSoundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM,5);
+        mSoundPool.load(mContext,R.raw.sound,1);
         createPoker();
     }
 
@@ -81,25 +82,25 @@ public class GameManager {
     }
 
     private void drawBackground(Canvas canvas, Paint paint) {
-        if (storePokerCount != 0) {
-            for (int i = 0; i < storePokerCount; i++) {
+        if (mStorePokerCount != 0) {
+            for (int i = 0; i < mStorePokerCount; i++) {
                 Rect des = new Rect();
-                des.set(storePokerStartX + (distance * i),storePokerStartY ,storePokerStartX + (distance * i) + 110 ,storePokerStartY + 157);
-                canvas.drawBitmap(backBitmap, null, des, paint);
+                des.set(mStorePokerStartX + (mDistance * i), mStorePokerStartY, mStorePokerStartX + (mDistance * i) + 110 , mStorePokerStartY + 157);
+                canvas.drawBitmap(mBackBitmap, null, des, paint);
             }
         }
         //画刷新图标
         Rect des = new Rect();
-        des.set(width - 200, height - 200, width - 200 + 128,height - 200 + 128);
-        canvas.drawBitmap(reflashBitmap,null,des,paint);
+        des.set(mWidth - 200, mHeight - 200, mWidth - 200 + 128, mHeight - 200 + 128);
+        canvas.drawBitmap(mReflashBitmap,null,des,paint);
     }
 
 
     private void drawList(Canvas canvas, Paint paint) {
-        for (int i = 0; i < lists.size(); i++) {
-            lists.get(i).onDraw(canvas,paint);
+        for (int i = 0; i < mLists.size(); i++) {
+            mLists.get(i).onDraw(canvas,paint);
         }
-        movingGroup.onDraw(canvas, paint);
+        mMovingGroup.onDraw(canvas, paint);
 
 
     }
@@ -119,36 +120,37 @@ public class GameManager {
                     return;
                 }
                 if (isReflash(x, y)) {
-                    Toast.makeText(context, "刷新！！", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "刷新！！", Toast.LENGTH_SHORT).show();
                     reflash();
                     return;
                 }
-                whichOne = x / itemWidth;
-                whichItem = lists.get(whichOne).witchPoker(y);
-                boolean moveable = lists.get(whichOne).moveable(whichItem);
+                whichOne = x / mItemWidth;
+                whichItem = mLists.get(whichOne).witchPoker(y);
+                boolean moveable = mLists.get(whichOne).moveable(whichItem);
                 if (whichItem != -1 && moveable) {
                     List<Poker> moving = getMovingList(whichOne, whichItem);
-                    movingGroup.getList().addAll(moving);
-                    movingGroup.setStartX(moving.get(0).getStartX());
+                    mMovingGroup.getmList().addAll(moving);
+                    mMovingGroup.setmStartX(moving.get(0).getmStartX());
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (movingGroup.getCount() != 0) {
+                if (mMovingGroup.getCount() != 0) {
                     int distanceX = (int) (event.getX() - x);
                     int distanceY = (int) (event.getY() - y);
-                    movingGroup.setDistanceXY(distanceX, distanceY);
+                    mMovingGroup.setDistanceXY(distanceX, distanceY);
                 }
 
                 break;
             case MotionEvent.ACTION_UP:
-                if (movingGroup.getCount() != 0) {
-                    List<Poker> listA = lists.get(whichOne).getList();
-                    int whichOne2 = (int) (event.getX() / itemWidth);
-                    if (lists.get(whichOne2).isSuccess(movingGroup)) {
-                        for (int i = 0; i < movingGroup.getCount(); i++) {
-                            movingGroup.getList().get(i).setDistanceXY(0,0);
-                            lists.get(whichOne2).addItem(movingGroup.getList().get(i));
+                if (mMovingGroup.getCount() != 0) {
+                    List<Poker> listA = mLists.get(whichOne).getmList();
+                    int whichOne2 = (int) (event.getX() / mItemWidth);
+                    if (mLists.get(whichOne2).isSuccess(mMovingGroup)) {
+                        for (int i = 0; i < mMovingGroup.getCount(); i++) {
+                            mMovingGroup.getmList().get(i).setDistanceXY(0,0);
+                            mLists.get(whichOne2).addItem(mMovingGroup.getmList().get(i));
                         }
+                        mLists.get(whichOne2).changeItemX();
 
                         if (listA.size() != 0) {
                             Log.d("GameManager", "ACTION_UP: setFace" + listA.size());
@@ -156,28 +158,28 @@ public class GameManager {
                         }
                         reflashPoker(whichOne);
                     } else {
-                        for (int i = 0; i < movingGroup.getCount(); i++) {
-                            lists.get(whichOne).addItem(movingGroup.getList().get(i));
-                            movingGroup.getList().get(i).setDistanceXY(0,0);
+                        for (int i = 0; i < mMovingGroup.getCount(); i++) {
+                            mLists.get(whichOne).addItem(mMovingGroup.getmList().get(i));
+                            mMovingGroup.getmList().get(i).setDistanceXY(0,0);
                         }
                     }
-                    if (lists.get(whichOne2).getCount() > 12) {
+                    if (mLists.get(whichOne2).getCount() > 12) {
                         checkIsFinish(whichOne2);
                     }
-                    movingGroup.clearAllDate();
-                    gameView.postInvalidate();
+                    mMovingGroup.clearAllDate();
+                    mGameView.postInvalidate();
                     whichOne = -1;
                     x = -1;
                     y = -1;
                 }
-                soundPool.play(1,1, 1, 0, 0, 1);
+                mSoundPool.play(1,1, 1, 0, 0, 1);
                 break;
         }
 
     }
 
     private boolean isReflash(int x, int y) {
-        if (x > width - 200 && x < width - 200 + 128 && y > height - 200 && y < height - 200 + 128) {
+        if (x > mWidth - 200 && x < mWidth - 200 + 128 && y > mHeight - 200 && y < mHeight - 200 + 128) {
             return true;
         } else {
             return false;
@@ -191,9 +193,10 @@ public class GameManager {
 
     private void checkIsFinish(int whichOne2) {
         reflashPoker(whichOne2);
-        List<Poker> listA = lists.get(whichOne2).getList();
+        List<Poker> listA = mLists.get(whichOne2).getmList();
         int count = listA.size();
         if (count == 0 || count < 13 || Integer.parseInt(listA.get(count - 1).getmNum()) != 1) {
+            return;
         }
         Boolean isFinish = isFinish(listA, count -1);
         if (isFinish) {
@@ -207,7 +210,14 @@ public class GameManager {
 
             }
             reflashPoker(whichOne2);
-            Toast.makeText(context,"恭喜！完成一组牌!!", Toast.LENGTH_SHORT).show();
+            mHasFinishPokerCount++;
+            if (mHasFinishPokerCount == 8) {
+                //游戏全部完成
+                Toast.makeText(mContext, "yeah~ 你完成了游戏! ^-^", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(mContext,"恭喜！完成一组牌!!", Toast.LENGTH_SHORT).show();
+            }
+
         }
 
     }
@@ -228,22 +238,22 @@ public class GameManager {
     }
 
     private void sendPoker() {
-        PokerGroup group = storeList.get(storeList.size() - 1);
+        PokerGroup group = mStoreList.get(mStoreList.size() - 1);
         for (int i = 0; i < group.getCount(); i++) {
-            group.getList().get(i).setFace(true);
-            lists.get(i).addItem(group.getList().get(i));
+            group.getmList().get(i).setFace(true);
+            mLists.get(i).addItem(group.getmList().get(i));
         }
-        storeList.remove(storeList.size() - 1);
-        storePokerCount = storeList.size();
-        for (int i = 0; i < lists.size(); i++) {
-            if (lists.get(i).getCount() > 12) {
+        mStoreList.remove(mStoreList.size() - 1);
+        mStorePokerCount = mStoreList.size();
+        for (int i = 0; i < mLists.size(); i++) {
+            if (mLists.get(i).getCount() > 12) {
                 checkIsFinish(i);
             }
         }
     }
 
     private Boolean isClickStore(int x, int y) {
-        if (x > storePokerStartX && x < (((storePokerCount - 1) * distance) + 110) && y > storePokerStartY && y < storePokerStartY + 157) {
+        if (x > mStorePokerStartX && x < (((mStorePokerCount - 1) * mDistance) + 110) && y > mStorePokerStartY && y < mStorePokerStartY + 157) {
             return true;
         } else {
             return false;
@@ -251,22 +261,22 @@ public class GameManager {
     }
 
     private List<Poker> getMovingList(int whichOne, int whichItem) {
-        int count = lists.get(whichOne).getCount();
+        int count = mLists.get(whichOne).getCount();
         List<Poker> list = new ArrayList<>();
         //添加
         for (int i = whichItem; i < count; i++) {
-            list.add(lists.get(whichOne).getList().get(i));
+            list.add(mLists.get(whichOne).getmList().get(i));
         }
         //删除
         for (int i = whichItem; i < count; i++) {
-            lists.get(whichOne).getList().remove(whichItem);
+            mLists.get(whichOne).getmList().remove(whichItem);
         }
         return list;
 
     }
 
     private void reflashPoker(int whichOne) {
-        List<Poker> listA = lists.get(whichOne).getList();
+        List<Poker> listA = mLists.get(whichOne).getmList();
         int count = listA.size();
         if (count != 0) {
                 Poker a = null;
@@ -278,7 +288,7 @@ public class GameManager {
                         b = listA.get(i - 1);
                     }
                     if (b != null) {
-                        if (lists.get(whichOne).checkIsSuccession(b, a)) {
+                        if (mLists.get(whichOne).checkIsSuccession(b, a)) {
                            a.setShade(false);
                            b.setShade(false);
 
@@ -312,21 +322,21 @@ public class GameManager {
                     if (j == 0) {
                         String buffer1= num + j + 1;
                         String buffer2 = num + j + 4;
-                        Poker poker1 = new Poker(context);
-                        Poker poker2 = new Poker(context);
+                        Poker poker1 = new Poker(mContext);
+                        Poker poker2 = new Poker(mContext);
                         poker1.init(num,j,1,false,buffer1);
                         poker2.init(num,j,4,false,buffer2);
-                        pokerList.add(poker1);
-                        pokerList.add(poker2);
+                        mPokerList.add(poker1);
+                        mPokerList.add(poker2);
                     } else {
                         String buffer1 = num + j + 2;
                         String buffer2 = num + j + 3;
-                        Poker poker1 = new Poker(context);
-                        Poker poker2 = new Poker(context);
+                        Poker poker1 = new Poker(mContext);
+                        Poker poker2 = new Poker(mContext);
                         poker1.init(num,j,2,false,buffer1);
                         poker2.init(num,j,3,false,buffer2);
-                        pokerList.add(poker1);
-                        pokerList.add(poker2);
+                        mPokerList.add(poker1);
+                        mPokerList.add(poker2);
                     }
 
                 }
@@ -338,34 +348,34 @@ public class GameManager {
     }
 
     private void switchPoker() {
-        Collections.shuffle(pokerList);
+        Collections.shuffle(mPokerList);
         int i = 0;
         int j = 0;
         int k = 0;
         int l = 0;
-        for(Iterator it = pokerList.iterator(); it.hasNext(); )
+        for(Iterator it = mPokerList.iterator(); it.hasNext(); )
         {
             if (k <4) {
-                lists.get(j).addInitItem((Poker) it.next());
+                mLists.get(j).addInitItem((Poker) it.next());
                 if (i == 5) {
-                    lists.get(j).getList().get(i).setFace(true);
+                    mLists.get(j).getmList().get(i).setFace(true);
                     i = -1;
                     k++;
                     j++;
 
                 }
             } else if (k >= 4 && k < 10){
-                lists.get(j).addInitItem((Poker) it.next());
+                mLists.get(j).addInitItem((Poker) it.next());
                 if (i == 4) {
-                    lists.get(j).getList().get(i).setFace(true);
+                    mLists.get(j).getmList().get(i).setFace(true);
                     i = -1;
                     k++;
                     j++;
                 }
             } else if (k >= 10) {
-                storeList.get(l).addInitItem((Poker) it.next());
+                mStoreList.get(l).addInitItem((Poker) it.next());
                 if (i == 9) {
-                    storeList.get(l).getList().get(i).setFace(true);
+                    mStoreList.get(l).getmList().get(i).setFace(true);
                     i = -1;
                     k++;
                     l++;
@@ -377,34 +387,34 @@ public class GameManager {
 
 
     public void clearList() {
-        for (int i = 0; i < lists.size(); i++) {
-            lists.get(i).clearAllDate();
+        for (int i = 0; i < mLists.size(); i++) {
+            mLists.get(i).clearAllDate();
         }
-        storeList.clear();
+        mStoreList.clear();
         for (int i = 11; i < 16; i++) {
-            PokerGroup group = new PokerGroup(context, i,currentLevel);
-            storeList.add(group);
+            PokerGroup group = new PokerGroup(mContext, i, mCurrentLevel);
+            mStoreList.add(group);
         }
-        storePokerCount = storeList.size();
-        movingGroup.clearAllDate();
-        for (Poker poker : pokerList) {
+        mStorePokerCount = mStoreList.size();
+        mMovingGroup.clearAllDate();
+        for (Poker poker : mPokerList) {
             poker.clear();
         }
     }
 
-    public void setStorePokerStartX(int storePokerStartX) {
-        this.storePokerStartX = storePokerStartX;
+    public void setmStorePokerStartX(int mStorePokerStartX) {
+        this.mStorePokerStartX = mStorePokerStartX;
     }
 
     public void setStorePokerStarty(int storePokerStarty) {
-        this.storePokerStartY = storePokerStarty;
+        this.mStorePokerStartY = storePokerStarty;
     }
 
-    public int getCurrentLevel() {
-        return currentLevel;
+    public int getmCurrentLevel() {
+        return mCurrentLevel;
     }
 
-    public void setCurrentLevel(int currentLevel) {
-        this.currentLevel = currentLevel;
+    public void setmCurrentLevel(int mCurrentLevel) {
+        this.mCurrentLevel = mCurrentLevel;
     }
 }

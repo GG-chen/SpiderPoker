@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
-import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,27 +13,27 @@ import java.util.List;
  */
 //数组
 public class PokerGroup {
-    private Context context;
+    private Context mContext;
     //第几组
-    private int num;
-    private List<Poker> list = new ArrayList<>();
-    private int startX;
-    private int width;
-    private int distance = 40;
-    private boolean success;
-    private int currentLevel;
+    private int mNum;
+    private List<Poker> mList = new ArrayList<>();
+    private int mStartX;
+    private int mWidth;
+    private int mDistance = 40;
+    private boolean isSuccess;
+    private int mCurrentLevel;
 
     public PokerGroup(Context context, int num, int currentLevel) {
-        this.currentLevel = currentLevel;
-        this.context = context;
-        this.num = num;
+        this.mCurrentLevel = currentLevel;
+        this.mContext = context;
+        this.mNum = num;
     }
 
     public void onDraw(Canvas canvas, Paint paint) {
         if (getCount() != 0) {
             setPokerY();
-            for (int i = 0; i < list.size(); i++) {
-                list.get(i).draw(canvas, paint);
+            for (int i = 0; i < mList.size(); i++) {
+                mList.get(i).draw(canvas, paint);
             }
 
         }
@@ -42,10 +41,10 @@ public class PokerGroup {
     }
 
     private void setPokerY() {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getStartY() == -1) {
-                list.get(i).setStartX(startX);
-                list.get(i).setStartY(distance * i);
+        for (int i = 0; i < mList.size(); i++) {
+            if (mList.get(i).getmStartY() == -1) {
+                mList.get(i).setmStartX(mStartX);
+                mList.get(i).setmStartY(mDistance * i);
 
             }
         }
@@ -54,11 +53,11 @@ public class PokerGroup {
 
     public int witchPoker(int y) {
         int one = -1;
-        if (y < ((list.size() - 1) * distance) + 157) {
-            if (y < ((list.size() - 1) * distance)) {
-                one = y / distance;
-            } else if (y > ((list.size() - 1) * distance) && y < ((list.size() - 1) * distance) + 157) {
-                one = list.size() - 1;
+        if (y < ((mList.size() - 1) * mDistance) + 157) {
+            if (y < ((mList.size() - 1) * mDistance)) {
+                one = y / mDistance;
+            } else if (y > ((mList.size() - 1) * mDistance) && y < ((mList.size() - 1) * mDistance) + 157) {
+                one = mList.size() - 1;
             }
 
         }
@@ -69,10 +68,10 @@ public class PokerGroup {
     public void addList(List<Poker> list) {
         if (list != null) {
             for (int i = 0; i < list.size(); i++) {
-                list.get(i).setStartX(startX);
-                list.get(i).setStartY(-1);
+                list.get(i).setmStartX(mStartX);
+                list.get(i).setmStartY(-1);
             }
-            this.list.addAll(list);
+            this.mList.addAll(list);
         }
         if (getCount() - list.size() > 0) {
             checkShade(list.size());
@@ -81,19 +80,19 @@ public class PokerGroup {
     public void addInitList(List<Poker> list) {
         if (list != null) {
             for (int i = 0; i < list.size(); i++) {
-                list.get(i).setStartX(startX);
-                list.get(i).setStartY(-1);
+                list.get(i).setmStartX(mStartX);
+                list.get(i).setmStartY(-1);
             }
-            this.list.addAll(list);
+            this.mList.addAll(list);
         }
 
     }
 
     public void addItem(Poker poker) {
         if (poker != null) {
-            poker.setStartX(startX);
-            poker.setStartY(-1);
-            this.list.add(poker);
+            poker.setmStartX(mStartX);
+            poker.setmStartY(-1);
+            this.mList.add(poker);
             Log.d("PokerGroup", "addItem" + poker.getmNum());
         }
         if (getCount() - 1 > 0 ) {
@@ -102,23 +101,23 @@ public class PokerGroup {
     }
     public void addInitItem(Poker poker) {
         if (poker != null) {
-            poker.setStartX(startX);
-            poker.setStartY(-1);
-            this.list.add(poker);
+            poker.setmStartX(mStartX);
+            poker.setmStartY(-1);
+            this.mList.add(poker);
         }
     }
 
     private void checkShade(int count) {
-        Poker poker = list.get(getCount() - count - 1);
-        Poker poker2 = list.get(getCount() - count);
+        Poker poker = mList.get(getCount() - count - 1);
+        Poker poker2 = mList.get(getCount() - count);
         if (poker.isFace()) {
             //判断是否连续
             boolean isSuccession = checkIsSuccession(poker, poker2);
             Log.d("PokerGroup", "checkShade: isSuccession" + isSuccession);
             if (!isSuccession) {
                 for (int i = 0; i < getCount() - count; i++) {
-                    if (list.get(i).isFace()) {
-                        list.get(i).setShade(true);
+                    if (mList.get(i).isFace()) {
+                        mList.get(i).setShade(true);
                     }
                 }
             }
@@ -130,7 +129,7 @@ public class PokerGroup {
         boolean isSuccession = true;
         int p = Integer.parseInt(poker.getmNum());
         int p2 = Integer.parseInt(poker2.getmNum()) + 1;
-        switch (currentLevel) {
+        switch (mCurrentLevel) {
             case GameManager.LEVEL_EASY:
                 if (p == p2) {
                     isSuccession = true;
@@ -158,43 +157,43 @@ public class PokerGroup {
     }
 
     public int getCount() {
-        return list.size();
+        return mList.size();
     }
 
-    public void setStartX(int startX) {
-        this.startX = startX;
+    public void setmStartX(int mStartX) {
+        this.mStartX = mStartX;
     }
 
-    public void setWidth(int width) {
-        this.width = width;
+    public void setmWidth(int mWidth) {
+        this.mWidth = mWidth;
     }
 
-    public int getNum() {
-        return num;
+    public int getmNum() {
+        return mNum;
     }
 
-    public List<Poker> getList() {
-        return list;
+    public List<Poker> getmList() {
+        return mList;
     }
 
     public void setDistanceXY(int distanceX, int distanceY) {
-        for (int i = 0; i < list.size(); i++) {
-            list.get(i).setDistanceXY(distanceX, distanceY);
+        for (int i = 0; i < mList.size(); i++) {
+            mList.get(i).setDistanceXY(distanceX, distanceY);
         }
     }
 
     public void setDistanceLastXY(int distanceX, int distanceY) {
-        for (int i = 0; i < list.size(); i++) {
-            list.get(i).setDistanceLastXY(distanceX, distanceY);
+        for (int i = 0; i < mList.size(); i++) {
+            mList.get(i).setDistanceLastXY(distanceX, distanceY);
         }
     }
 
     public boolean isSuccess(PokerGroup movingGroup) {
-        int c = Integer.parseInt(movingGroup.getList().get(0).getmNum()) + 1;
-        if (list.size() == 0) {
+        int c = Integer.parseInt(movingGroup.getmList().get(0).getmNum()) + 1;
+        if (mList.size() == 0) {
             return true;
         }
-        int b = Integer.parseInt(list.get(list.size() - 1).getmNum());
+        int b = Integer.parseInt(mList.get(mList.size() - 1).getmNum());
         if (b == c) {
             return true;
         }
@@ -202,18 +201,27 @@ public class PokerGroup {
     }
 
     public void clearAllDate() {
-        list.clear();
+        mList.clear();
     }
 
     public boolean moveable(int whichItem) {
         if (whichItem == -1) {
             return false;
         }
-        if ((!list.get(whichItem).isShade()) && list.get(whichItem).isFace()) {
+        if ((!mList.get(whichItem).isShade()) && mList.get(whichItem).isFace()) {
             return true;
         } else {
             return false;
         }
 
+    }
+
+    public void changeItemX() {
+        for (int i = 0; i < mList.size(); i++) {
+            Poker poker = mList.get(i);
+            if (poker.getmStartX() != this.mStartX) {
+                poker.setmStartX(this.mStartX);
+            }
+        }
     }
 }

@@ -1,17 +1,13 @@
 package com.chen.spiderpoker;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,14 +21,14 @@ import android.widget.LinearLayout;
  */
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback, View.OnClickListener {
-    private GameManager gameManager;
-    private Context context;
-    private SurfaceHolder holder;
+    private GameManager mGameManager;
+    private Context mContext;
+    private SurfaceHolder mHolder;
     private MyThread myThread;
-    private int width;
-    private int height;
-    private Paint paint;
-    private AlertDialog dialog;
+    private int mWidth;
+    private int mHeight;
+    private Paint mPaint;
+    private AlertDialog mDialog;
 
     public GameView(Context context) {
         this(context, null);
@@ -44,27 +40,27 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
 
     public GameView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.context = context;
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        this.mContext = context;
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
     }
 
     public void initData() {
-        gameManager = new GameManager(context,width,height,this);
-        holder = this.getHolder();
-        holder.addCallback(this);
-        myThread = new MyThread(holder);//创建一个绘图线程
+        mGameManager = new GameManager(mContext, mWidth, mHeight,this);
+        mHolder = this.getHolder();
+        mHolder.addCallback(this);
+        myThread = new MyThread(mHolder);//创建一个绘图线程
     }
 
     public void onDrawPoker(Canvas canvas, Paint paint) {
-        gameManager.onDraw(canvas,paint);
+        mGameManager.onDraw(canvas,paint);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        gameManager.onTouch(event);
+        mGameManager.onTouch(event);
         return true;
     }
 
@@ -93,22 +89,22 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.easy:
-                gameManager.setCurrentLevel(GameManager.LEVEL_EASY);
-                dialog.cancel();
+                mGameManager.setmCurrentLevel(GameManager.LEVEL_EASY);
+                mDialog.cancel();
                 threadStart();
                 break;
             case R.id.ordinary:
-                gameManager.setCurrentLevel(GameManager.LEVEL_ORDINARY);
-                dialog.cancel();
+                mGameManager.setmCurrentLevel(GameManager.LEVEL_ORDINARY);
+                mDialog.cancel();
                 threadStart();
                 break;
             case R.id.hard:
-                gameManager.setCurrentLevel(GameManager.LEVEL_HARD);
-                dialog.cancel();
+                mGameManager.setmCurrentLevel(GameManager.LEVEL_HARD);
+                mDialog.cancel();
                 threadStart();
                 break;
             case R.id.exit:
-                ((MainActivity)context).exitActivity();
+                ((MainActivity) mContext).exitActivity();
         }
 
     }
@@ -129,8 +125,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
                 try {
                     synchronized (holder) {
                         c = holder.lockCanvas();//锁定画布，一般在锁定后就可以通过其返回的画布对象Canvas，在其上面画图等操作了。
-                        c.drawPaint(paint);
-                        onDrawPoker(c ,paint);
+                        c.drawPaint(mPaint);
+                        onDrawPoker(c , mPaint);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -144,23 +140,23 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
         }
     }
 
-    public void setWidth(int width) {
-        this.width = width;
+    public void setmWidth(int mWidth) {
+        this.mWidth = mWidth;
     }
 
-    public void setHeight(int height) {
-        this.height = height;
+    public void setmHeight(int mHeight) {
+        this.mHeight = mHeight;
     }
     private void showDialog() {
-         LinearLayout layout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_dialog, null);
-        dialog = new AlertDialog.Builder(context).create();
-        dialog.show();
-        dialog.getWindow().setContentView(layout);
+         LinearLayout layout = (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.layout_dialog, null);
+        mDialog = new AlertDialog.Builder(mContext).create();
+        mDialog.show();
+        mDialog.getWindow().setContentView(layout);
         layout.findViewById(R.id.easy).setOnClickListener(this);
         layout.findViewById(R.id.ordinary).setOnClickListener(this);
         layout.findViewById(R.id.hard).setOnClickListener(this);
         layout.findViewById(R.id.exit).setOnClickListener(this);
-        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+        mDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event)
             {
